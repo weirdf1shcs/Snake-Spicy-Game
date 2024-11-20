@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
-public class Snake : MonoBehaviour
+public class SnakeController : MonoBehaviour
 {
     public Transform segmentPrefab;
     public Vector2Int direction = Vector2Int.right;
@@ -42,9 +43,24 @@ public class Snake : MonoBehaviour
         {
             input = Vector2Int.left;
         }
-
         if (input != Vector2Int.zero)
         {
+            if (input == Vector2Int.up)
+            {
+                transform.rotation = Quaternion.Euler(0, 0, 0); 
+            }
+            else if (input == Vector2Int.down)
+            {
+                transform.rotation = Quaternion.Euler(0, 0, 180);
+            }
+            else if (input == Vector2Int.left)
+            {
+                transform.rotation = Quaternion.Euler(0, 0, 90);
+            }
+            else if (input == Vector2Int.right)
+            {
+                transform.rotation = Quaternion.Euler(0, 0, 270);
+            }
             if (IsValidMove(input))
             {
                 direction = input;
@@ -66,15 +82,31 @@ public class Snake : MonoBehaviour
     {
         int x = Mathf.RoundToInt(transform.position.x) + newDirection.x;
         int y = Mathf.RoundToInt(transform.position.y) + newDirection.y;
+        Vector2 nextPosition = new Vector2(x, y);
+        Vector3 tailPosition = segments[segments.Count - 1].position;
         foreach (Transform segment in segments)
         {
-            if (Mathf.RoundToInt(segment.position.x) == x &&
+            if (segment.position != tailPosition &&
+                Mathf.RoundToInt(segment.position.x) == x &&
                 Mathf.RoundToInt(segment.position.y) == y)
             {
                 return false;
             }
         }
-        // more logic here later
+        Collider2D[] colliders = Physics2D.OverlapPointAll(nextPosition);
+        foreach (Collider2D collider in colliders)
+        {
+            if (collider.CompareTag("Wall"))
+            {
+                return false;
+            }
+            if (collider.CompareTag("Object"))
+            {
+                HandleObjectCollision(collider.GetComponent<Object>());
+                return false;
+            }
+        }
+
         return true;
     }
     public void MoveBackwards()
@@ -87,7 +119,22 @@ public class Snake : MonoBehaviour
             int y = Mathf.RoundToInt(segment.position.y) + reverseDirection.y;
             newPositions.Add(new Vector3(x, y, segment.position.z));
         }
-        // more logic here later
+        for (int i = 0; i < segments.Count; i++)
+        {
+            Vector3 segmentPosition = newPositions[i];
+            Collider2D[] colliders = Physics2D.OverlapPointAll(segmentPosition);
+            foreach (Collider2D collider in colliders)
+            {
+                if (collider.CompareTag("Object"))
+                {
+                    Object obj = collider.GetComponent<Object>();
+                    Vector2Int objectNewPosition = new Vector2Int(
+                        Mathf.RoundToInt(obj.transform.position.x) + reverseDirection.x,
+                        Mathf.RoundToInt(obj.transform.position.y) + reverseDirection.y);
+                    obj.transform.position = new Vector2(objectNewPosition.x, objectNewPosition.y);
+                }
+            }
+        }
         for (int i = 0; i < segments.Count; i++)
         {
             segments[i].position = newPositions[i];
@@ -115,7 +162,6 @@ public class Snake : MonoBehaviour
                 return;
             }
         }
-        // If no valid position was found, error
         throw new System.Exception("Snake can't grow!");
     }
 
@@ -133,52 +179,24 @@ public class Snake : MonoBehaviour
             Grow();
         }
     }
-    public bool Occupies(int x, int y)
+    private void HandleObjectCollision(Object @object)
     {
-        foreach (Transform segment in segments)
+        direction = input;
+        Vector2Int newObjectPosition = new Vector2Int(
+            Mathf.RoundToInt(@object.transform.position.x) + direction.x,
+            Mathf.RoundToInt(@object.transform.position.y) + direction.y
+        );
+        Collider2D[] colliders = Physics2D.OverlapPointAll(new Vector2(newObjectPosition.x, newObjectPosition.y));
+        foreach (Collider2D collider in colliders)
         {
-            if (Mathf.RoundToInt(segment.position.x) == x &&
-                Mathf.RoundToInt(segment.position.y) == y)
+            if (collider.CompareTag("Wall") || collider.CompareTag("Segment"))
             {
-                return true;
+                MoveSnake();
+                @object.NextStep();
+                return;
             }
         }
-        return false;
-    }
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.gameObject.CompareTag("Food"))
-        {
-            Grow();
-        }
-        else if (other.gameObject.CompareTag("Obstacle"))
-        {
-            ResetState();
-        }
-        else if (other.gameObject.CompareTag("Wall"))
-        {
-            if (moveThroughWalls)
-            {
-                Traverse(other.transform);
-            }
-            else
-            {
-                ResetState();
-            }
-        }
-    }
-    private void Traverse(Transform wall)
-    {
-        Vector3 position = transform.position;
-
-        if (direction.x != 0f)
-        {
-            position.x = Mathf.RoundToInt(-wall.position.x + direction.x);
-        }
-        else if (direction.y != 0f)
-        {
-            position.y = Mathf.RoundToInt(-wall.position.y + direction.y);
-        }
-        transform.position = position;
+        @object.transform.position = new Vector2(newObjectPosition.x, newObjectPosition.y);
+        MoveSnake();
     }
 }
