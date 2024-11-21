@@ -205,36 +205,54 @@ public class SnakeController : MonoBehaviour
     }
 
     public void Grow()
+{
+    Transform lastSegment = segments[segments.Count - 1];
+    Vector3 directionAsVector3 = new Vector3(direction.x, direction.y, 0);
+    Vector3 preferredPosition = lastSegment.position - directionAsVector3;
+    Collider2D[] preferredColliders = Physics2D.OverlapPointAll(preferredPosition);
+    bool isPreferredBlocked = false;
+    foreach (Collider2D collider in preferredColliders)
     {
-        Transform lastSegment = segments[segments.Count - 1];
-        Vector3[] potentialPositions = new Vector3[]
+        if (collider.CompareTag("Wall") || collider.CompareTag("Segment") || collider.CompareTag("Object"))
         {
-            lastSegment.position - Vector3.right,
-            lastSegment.position + Vector3.right,
-            lastSegment.position - Vector3.up,
-            lastSegment.position + Vector3.up
-        };
-        foreach (Vector3 position in potentialPositions)
+            isPreferredBlocked = true;
+            break;
+        }
+    }
+    if (!isPreferredBlocked)
+    {
+        Transform newSegment = Instantiate(segmentPrefab, preferredPosition, Quaternion.identity);
+        segments.Add(newSegment);
+        return;
+    }
+    Vector3[] alternativePositions = new Vector3[]
+    {
+        lastSegment.position - Vector3.right,
+        lastSegment.position + Vector3.right,
+        lastSegment.position - Vector3.up,
+        lastSegment.position + Vector3.up
+    };
+    foreach (Vector3 position in alternativePositions)
+    {
+        Collider2D[] colliders = Physics2D.OverlapPointAll(position);
+        bool isBlocked = false;
+        foreach (Collider2D collider in colliders)
         {
-            Collider2D[] colliders = Physics2D.OverlapPointAll(position);
-            bool isBlocked = false;
-            foreach (Collider2D collider in colliders)
+            if (collider.CompareTag("Wall") || collider.CompareTag("Segment") || collider.CompareTag("Object"))
             {
-                if (collider.CompareTag("Wall") || collider.CompareTag("Segment") || collider.CompareTag("Object"))
-                {
-                    isBlocked = true;
-                    break;
-                }
-            }
-            if (!isBlocked)
-            {
-                Transform newSegment = Instantiate(segmentPrefab, position, Quaternion.identity);
-                segments.Add(newSegment);
-                return;
+                isBlocked = true;
+                break;
             }
         }
-        GameManager.instance.segments = segments;
+        if (!isBlocked)
+        {
+            Transform newSegment = Instantiate(segmentPrefab, position, Quaternion.identity);
+            segments.Add(newSegment);
+            return;
+        }
     }
+    GameManager.instance.segments = segments;
+}
 
     public void StartUp()
     {

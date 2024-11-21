@@ -83,6 +83,11 @@ public class GameManager : MonoBehaviour
         snakeController.canMove = false;
         StartCoroutine(GoBackwardsUntil());
     }
+
+    public void NextLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+    }
     
     private IEnumerator GoBackwardsUntil()
     {
