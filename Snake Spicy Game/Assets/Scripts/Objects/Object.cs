@@ -7,7 +7,6 @@ public class Object : MonoBehaviour
         Pepper,
         Banana
     }
-
     public SnakeController sc;
     public Type type;
     public void NextStep()
@@ -22,6 +21,9 @@ public class Object : MonoBehaviour
                 sc.Grow();
                 break;
         }
+
+        GameManager.instance.objects.Remove(this.gameObject);
+        GameManager.instance.CheckForCompletion();
         Destroy(gameObject);
     }
 }

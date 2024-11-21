@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -13,7 +14,7 @@ public class SnakeController : MonoBehaviour
     public bool canMove = true;
     private void Start()
     {
-        ResetState();
+        StartUp();
     }
 
     private void Update()
@@ -84,6 +85,26 @@ public class SnakeController : MonoBehaviour
         int x = Mathf.RoundToInt(transform.position.x) + direction.x;
         int y = Mathf.RoundToInt(transform.position.y) + direction.y;
         transform.position = new Vector2(x, y);
+        if (!IsOnFloor())
+        {
+            canMove = false;
+        }
+    }
+    
+    public bool IsOnFloor()
+    {
+        foreach (Transform segment in segments)
+        {
+            Collider2D[] colliders = Physics2D.OverlapPointAll(segment.position);
+            foreach (Collider2D collider in colliders)
+            {
+                if (collider.CompareTag("Floor"))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     private bool IsValidMove(Vector2Int newDirection)
     {
@@ -200,25 +221,27 @@ public class SnakeController : MonoBehaviour
         foreach (Vector3 position in potentialPositions)
         {
             Collider2D[] colliders = Physics2D.OverlapPointAll(position);
-            if (colliders.Length == 0)
+            bool isBlocked = false;
+            foreach (Collider2D collider in colliders)
+            {
+                if (collider.CompareTag("Wall") || collider.CompareTag("Segment") || collider.CompareTag("Object"))
+                {
+                    isBlocked = true;
+                    break;
+                }
+            }
+            if (!isBlocked)
             {
                 Transform newSegment = Instantiate(segmentPrefab, position, Quaternion.identity);
                 segments.Add(newSegment);
                 return;
             }
         }
-
         GameManager.instance.segments = segments;
     }
 
-    public void ResetState()
+    public void StartUp()
     {
-        transform.position = Vector3.zero;
-        for (int i = 1; i < segments.Count; i++)
-        {
-            Destroy(segments[i].gameObject);
-        }
-        segments.Clear();
         segments.Add(transform);
         for (int i = 0; i < initialSize - 1; i++)
         {
@@ -256,5 +279,13 @@ public class SnakeController : MonoBehaviour
             return false;
         }
         return true;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Hole") && GameManager.instance.ExitOpen)
+        {
+            GameManager.instance.FinishLevel();
+        }
     }
 }

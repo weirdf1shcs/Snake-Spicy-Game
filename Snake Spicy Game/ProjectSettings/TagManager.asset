@@ -8,6 +8,8 @@ TagManager:
   - Object
   - Segment
   - Snake
+  - Hole
+  - Floor
   layers:
   - Default
   - TransparentFX
