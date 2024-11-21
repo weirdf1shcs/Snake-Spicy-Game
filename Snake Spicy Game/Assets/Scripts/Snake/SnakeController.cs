@@ -87,7 +87,8 @@ public class SnakeController : MonoBehaviour
         transform.position = new Vector2(x, y);
         if (!IsOnFloor())
         {
-            canMove = false;
+            GameManager.instance.failureReason = "The snake fell into the void!";
+            GameManager.instance.FailureState();
         }
     }
     

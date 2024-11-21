@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,6 +13,10 @@ public class GameManager : MonoBehaviour
     public List<GameObject> objects = new List<GameObject>();
     [SerializeField] private Sprite finishHoleSprite;
     public bool ExitOpen = false;
+    public GameObject failureUI;
+    public GameObject successUI;
+    [SerializeField] TextMeshProUGUI failureText;
+    public String failureReason;
     void Awake()
     {
         instance = this; 
@@ -46,6 +51,8 @@ public class GameManager : MonoBehaviour
 
     public void FinishLevel()
     {
+        snakeController.canMove = false;
+        successUI.SetActive(true);
         Debug.Log("Wow. You did it!");
     }
 
@@ -68,6 +75,7 @@ public class GameManager : MonoBehaviour
                 if (!snakeController.InBounds())
                 {
                     ableToGoBackwards = false;
+                    failureReason = "The snake is flying forever!";
                     FailureState();
                 }
             }
@@ -80,8 +88,11 @@ public class GameManager : MonoBehaviour
         yield return null;
     }
 
-    void FailureState()
+    public void FailureState()
     {
+        snakeController.canMove = false;
+        failureText.text = failureReason;
+        failureUI.SetActive(true);
         //Show the player that they have failed the level, and offer to restart. Optionally, show a reason.
     }
 }
