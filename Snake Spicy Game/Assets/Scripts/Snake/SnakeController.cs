@@ -8,9 +8,9 @@ public class SnakeController : MonoBehaviour
     public Transform segmentPrefab;
     public Vector2Int direction = Vector2Int.right;
     public int initialSize = 4;
-    public bool moveThroughWalls = false;
     public List<Transform> segments = new List<Transform>();
     private Vector2Int input;
+    public bool canMove = true;
     private void Start()
     {
         ResetState();
@@ -25,7 +25,10 @@ public class SnakeController : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.B))
         {
-            MoveBackwards();
+            if (CanMoveBackwards())
+            {
+                MoveBackwards();
+            }
         }
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
         {
@@ -43,28 +46,32 @@ public class SnakeController : MonoBehaviour
         {
             input = Vector2Int.left;
         }
-        if (input != Vector2Int.zero)
+
+        if (canMove)
         {
-            if (input == Vector2Int.up)
+            if (input != Vector2Int.zero)
             {
-                transform.rotation = Quaternion.Euler(0, 0, 0); 
-            }
-            else if (input == Vector2Int.down)
-            {
-                transform.rotation = Quaternion.Euler(0, 0, 180);
-            }
-            else if (input == Vector2Int.left)
-            {
-                transform.rotation = Quaternion.Euler(0, 0, 90);
-            }
-            else if (input == Vector2Int.right)
-            {
-                transform.rotation = Quaternion.Euler(0, 0, 270);
-            }
-            if (IsValidMove(input))
-            {
-                direction = input;
-                MoveSnake();
+                if (input == Vector2Int.up)
+                {
+                    transform.rotation = Quaternion.Euler(0, 0, 0); 
+                }
+                else if (input == Vector2Int.down)
+                {
+                    transform.rotation = Quaternion.Euler(0, 0, 180);
+                }
+                else if (input == Vector2Int.left)
+                {
+                    transform.rotation = Quaternion.Euler(0, 0, 90);
+                }
+                else if (input == Vector2Int.right)
+                {
+                    transform.rotation = Quaternion.Euler(0, 0, 270);
+                }
+                if (IsValidMove(input))
+                {
+                    direction = input;
+                    MoveSnake();
+                }
             }
         }
     }
@@ -108,6 +115,44 @@ public class SnakeController : MonoBehaviour
         }
 
         return true;
+    }
+    public bool CanMoveBackwards()
+    {
+        Vector2Int reverseDirection = -direction;
+        foreach (Transform segment in segments)
+        {
+            int x = Mathf.RoundToInt(segment.position.x) + reverseDirection.x;
+            int y = Mathf.RoundToInt(segment.position.y) + reverseDirection.y;
+            Vector2 nextPosition = new Vector2(x, y);
+
+            Collider2D[] colliders = Physics2D.OverlapPointAll(nextPosition);
+            foreach (Collider2D collider in colliders)
+            {
+                if (collider.CompareTag("Wall"))
+                {
+                    return false;
+                }
+                if (collider.CompareTag("Object"))
+                {
+                    Object obj = collider.GetComponent<Object>();
+                    if (obj != null)
+                    {
+                        int objX = Mathf.RoundToInt(obj.transform.position.x) + reverseDirection.x;
+                        int objY = Mathf.RoundToInt(obj.transform.position.y) + reverseDirection.y;
+                        Vector2 objNextPosition = new Vector2(objX, objY);
+                        Collider2D[] objectColliders = Physics2D.OverlapPointAll(objNextPosition);
+                        foreach (Collider2D objectCollider in objectColliders)
+                        {
+                            if (objectCollider.CompareTag("Wall"))
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true; 
     }
     public void MoveBackwards()
     {
@@ -162,7 +207,8 @@ public class SnakeController : MonoBehaviour
                 return;
             }
         }
-        throw new System.Exception("Snake can't grow!");
+
+        GameManager.instance.segments = segments;
     }
 
     public void ResetState()
@@ -178,6 +224,7 @@ public class SnakeController : MonoBehaviour
         {
             Grow();
         }
+        GameManager.instance.segments = segments;
     }
     private void HandleObjectCollision(Object @object)
     {
@@ -198,5 +245,16 @@ public class SnakeController : MonoBehaviour
         }
         @object.transform.position = new Vector2(newObjectPosition.x, newObjectPosition.y);
         MoveSnake();
+    }
+    public bool InBounds()
+    {
+        if (segments[0].transform.position.x <= GridManager.instance.leftXBound || 
+            segments[0].transform.position.x >= GridManager.instance.rightXBound ||
+            segments[0].transform.position.y <= GridManager.instance.downYBound ||
+            segments[0].transform.position.y >= GridManager.instance.upYBound)
+        {
+            return false;
+        }
+        return true;
     }
 }

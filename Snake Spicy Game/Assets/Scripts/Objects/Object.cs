@@ -16,6 +16,7 @@ public class Object : MonoBehaviour
         switch (type)
         {
             case Type.Pepper:
+                GameManager.instance.GoBackwards();
                 break;
             case Type.Banana:
                 sc.Grow();
