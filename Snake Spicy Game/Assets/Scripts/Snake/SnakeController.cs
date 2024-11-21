@@ -275,6 +275,7 @@ public class SnakeController : MonoBehaviour
         {
             if (collider.CompareTag("Wall") || collider.CompareTag("Segment"))
             {
+                SpriteManager.instance.ChangeHeadDirection(input);
                 MoveSnake();
                 @object.NextStep();
                 return;
@@ -298,7 +299,7 @@ public class SnakeController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Hole") && GameManager.instance.ExitOpen)
+        if (collision.CompareTag("Hole") && GameManager.instance.ExitOpen && canMove)
         {
             GameManager.instance.FinishLevel();
         }

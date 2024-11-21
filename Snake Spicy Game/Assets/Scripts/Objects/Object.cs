@@ -11,7 +11,6 @@ public class Object : MonoBehaviour
     public Type type;
     public void NextStep()
     {
-        Debug.Log(type.ToString());
         switch (type)
         {
             case Type.Pepper:

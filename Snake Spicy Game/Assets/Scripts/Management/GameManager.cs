@@ -24,6 +24,8 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = false;
         snakeController = GameObject.FindWithTag("Snake").GetComponent<SnakeController>();
     }
 
@@ -73,9 +75,10 @@ public class GameManager : MonoBehaviour
 
     public void FinishLevel()
     {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         snakeController.canMove = false;
         successUI.SetActive(true);
-        Debug.Log("Wow. You did it!");
     }
 
     public void GoBackwards()
@@ -117,6 +120,8 @@ public class GameManager : MonoBehaviour
 
     public void FailureState()
     {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         snakeController.canMove = false;
         failureText.text = failureReason;
         failureUI.SetActive(true);
