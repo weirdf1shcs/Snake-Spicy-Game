@@ -47,29 +47,13 @@ public class SnakeController : MonoBehaviour
         {
             input = Vector2Int.left;
         }
-
         if (canMove)
         {
             if (input != Vector2Int.zero)
             {
-                if (input == Vector2Int.up)
-                {
-                    transform.rotation = Quaternion.Euler(0, 0, 0); 
-                }
-                else if (input == Vector2Int.down)
-                {
-                    transform.rotation = Quaternion.Euler(0, 0, 180);
-                }
-                else if (input == Vector2Int.left)
-                {
-                    transform.rotation = Quaternion.Euler(0, 0, 90);
-                }
-                else if (input == Vector2Int.right)
-                {
-                    transform.rotation = Quaternion.Euler(0, 0, 270);
-                }
                 if (IsValidMove(input))
                 {
+                    SpriteManager.instance.ChangeHeadDirection(input);
                     direction = input;
                     MoveSnake();
                 }
@@ -85,9 +69,16 @@ public class SnakeController : MonoBehaviour
         int x = Mathf.RoundToInt(transform.position.x) + direction.x;
         int y = Mathf.RoundToInt(transform.position.y) + direction.y;
         transform.position = new Vector2(x, y);
-        if (!IsOnFloor())
+        if (!IsOnFloor() || !GameManager.instance.ObjectsOnFloor())
         {
-            GameManager.instance.failureReason = "The snake fell into the void!";
+            if (!GameManager.instance.ObjectsOnFloor())
+            {
+                GameManager.instance.failureReason = "An object fell into the void!";
+            }
+            else
+            {
+                GameManager.instance.failureReason = "The snake fell into the void!";
+            }
             GameManager.instance.FailureState();
         }
     }
@@ -104,6 +95,10 @@ public class SnakeController : MonoBehaviour
                     return true;
                 }
             }
+        }
+        if (!GameManager.instance.ObjectsOnFloor())
+        {
+            return false;
         }
         return false;
     }
@@ -268,6 +263,7 @@ public class SnakeController : MonoBehaviour
             }
         }
         @object.transform.position = new Vector2(newObjectPosition.x, newObjectPosition.y);
+        SpriteManager.instance.ChangeHeadDirection(input);
         MoveSnake();
     }
     public bool InBounds()

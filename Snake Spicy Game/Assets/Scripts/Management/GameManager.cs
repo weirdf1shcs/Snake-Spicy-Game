@@ -40,6 +40,28 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
+    public bool ObjectsOnFloor()
+    {
+        foreach (GameObject tempObject in objects)
+        {
+            bool lackOfFloor = true;
+            Collider2D[] colliders = Physics2D.OverlapPointAll(tempObject.gameObject.transform.position);
+            foreach (Collider2D collider in colliders)
+            {
+                if (collider.CompareTag("Floor"))
+                {
+                    lackOfFloor = false;
+                    break; 
+                }
+            }
+            if (lackOfFloor)
+            {
+                return false;
+            }
+        }
+        
+        return true;
+    }
     public void CheckForCompletion()
     {
         if (objects.Count == 0)
