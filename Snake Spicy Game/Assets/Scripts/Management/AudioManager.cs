@@ -25,6 +25,12 @@ public class AudioManager : MonoBehaviour
         musicAudioSource.Play();
     }
 
+    public void StopCheck()
+    {
+        sfxAudioSource.loop = false;
+        sfxAudioSource.Stop();
+    }
+
     public void PlayBananaSFX()
     {
         sfxAudioSource.PlayOneShot(bananaSFX);

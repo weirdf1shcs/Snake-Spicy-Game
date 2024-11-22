@@ -39,10 +39,12 @@ public class GameManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
+            AudioManager.instance.StopCheck();
             Restart();
         }
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            AudioManager.instance.StopCheck();
             SceneManager.LoadScene("MainMenu");
         }
     }
