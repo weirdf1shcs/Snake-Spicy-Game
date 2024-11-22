@@ -115,6 +115,11 @@ public class GameManager : MonoBehaviour
                 snakeController.canMove = true;
             }
         }
+
+        if (!snakeController.IsOnFloor() || !ObjectsOnFloor())
+        {
+            FailureState();
+        }
         yield return null;
     }
 
