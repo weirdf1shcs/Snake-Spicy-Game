@@ -128,8 +128,6 @@ public class SnakeController : MonoBehaviour
     public bool CanMoveBackwards()
 {
     Vector2Int reverseDirection = -direction;
-
-    // Check for any obstructions in the reverse direction for each snake segment
     foreach (Transform segment in segments)
     {
         int x = Mathf.RoundToInt(segment.position.x) + reverseDirection.x;
@@ -141,7 +139,7 @@ public class SnakeController : MonoBehaviour
         {
             if (collider.CompareTag("Wall"))
             {
-                return false; // Movement is blocked by a wall
+                return false;
             }
 
             if (collider.CompareTag("Object"))
@@ -149,22 +147,20 @@ public class SnakeController : MonoBehaviour
                 Object obj = collider.GetComponent<Object>();
                 if (!CanMoveObjectChain(obj, reverseDirection))
                 {
-                    return false; // The chain of objects cannot move in the reverse direction
+                    return false; 
                 }
             }
         }
     }
 
-    return true; // No obstructions; the snake can move backward
+    return true; 
 }
 
-// Helper function to check if an object chain can move in the reverse direction
 private bool CanMoveObjectChain(Object obj, Vector2Int reverseDirection)
 {
     List<Object> chain = new List<Object>();
     Object currentObject = obj;
 
-    // Collect the chain of objects in reverse order
     while (currentObject != null)
     {
         chain.Add(currentObject);
@@ -174,31 +170,29 @@ private bool CanMoveObjectChain(Object obj, Vector2Int reverseDirection)
         Vector2 nextPosition = new Vector2(objX, objY);
 
         Collider2D[] colliders = Physics2D.OverlapPointAll(nextPosition);
-        currentObject = null; // Reset for the next iteration
+        currentObject = null; 
 
         foreach (Collider2D collider in colliders)
         {
             if (collider.CompareTag("Wall") || collider.CompareTag("Segment"))
             {
-                return false; // The object chain is blocked by a wall or snake segment
+                return false;
             }
-
             if (collider.CompareTag("Object"))
             {
                 currentObject = collider.GetComponent<Object>();
-                break; // Continue the chain
+                break;
             }
         }
     }
 
-    return true; // The entire chain can move in the reverse direction
+    return true; 
 }
     public void MoveBackwards()
 {
     Vector2Int reverseDirection = -direction;
     List<Vector3> newPositions = new List<Vector3>();
 
-    // Move all snake segments backwards by one position
     foreach (Transform segment in segments)
     {
         int x = Mathf.RoundToInt(segment.position.x) + reverseDirection.x;
@@ -206,15 +200,13 @@ private bool CanMoveObjectChain(Object obj, Vector2Int reverseDirection)
         newPositions.Add(new Vector3(x, y, segment.position.z));
     }
 
-    // Move the snake's segments to their new positions
     for (int i = 0; i < segments.Count; i++)
     {
         segments[i].position = newPositions[i];
     }
 
-    transform.position = newPositions[0];  // Move the snake's head to the new position
+    transform.position = newPositions[0];  
 
-    // Move any objects in the same direction
     foreach (Transform segment in segments)
     {
         Collider2D[] colliders = Physics2D.OverlapPointAll(segment.position);
@@ -226,7 +218,6 @@ private bool CanMoveObjectChain(Object obj, Vector2Int reverseDirection)
                 List<Object> chain = new List<Object>();
                 Object currentObject = obj;
 
-                // Collect the chain of objects in reverse order (to handle multiple connected objects)
                 while (currentObject != null)
                 {
                     chain.Add(currentObject);
@@ -235,7 +226,7 @@ private bool CanMoveObjectChain(Object obj, Vector2Int reverseDirection)
                     Vector2 nextPosition = new Vector2(objX, objY);
 
                     Collider2D[] objectColliders = Physics2D.OverlapPointAll(nextPosition);
-                    currentObject = null; // Reset for next iteration
+                    currentObject = null;
 
                     foreach (Collider2D objectCollider in objectColliders)
                     {
@@ -247,7 +238,6 @@ private bool CanMoveObjectChain(Object obj, Vector2Int reverseDirection)
                     }
                 }
 
-                // Move all objects in the chain if no blockage
                 for (int i = chain.Count - 1; i >= 0; i--)
                 {
                     Object chainObject = chain[i];
@@ -326,7 +316,6 @@ private bool CanMoveObjectChain(Object obj, Vector2Int reverseDirection)
     Object currentObject = @object;
     bool isBlocked = false;
 
-    // Collect all objects in the chain
     while (currentObject != null)
     {
         chain.Add(currentObject);

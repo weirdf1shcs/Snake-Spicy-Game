@@ -165,6 +165,5 @@ public class GameManager : MonoBehaviour
         snakeController.canMove = false;
         failureText.text = failureReason;
         failureUI.SetActive(true);
-        //Show the player that they have failed the level, and offer to restart. Optionally, show a reason.
     }
 }
