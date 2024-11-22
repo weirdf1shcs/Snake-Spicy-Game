@@ -1910,6 +1910,7 @@ MonoBehaviour:
   successUI: {fileID: 1952072512}
   failureText: {fileID: 884571736}
   failureReason: 
+  audioManagerGameObject: {fileID: 5248136010839723293, guid: 22c3a0734c9d94087a40d6cf361458f2, type: 3}
 --- !u!4 &1382851255
 Transform:
   m_ObjectHideFlags: 0

@@ -10,6 +10,7 @@ TagManager:
   - Snake
   - Hole
   - Floor
+  - Audio
   layers:
   - Default
   - TransparentFX

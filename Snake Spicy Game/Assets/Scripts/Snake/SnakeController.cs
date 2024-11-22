@@ -22,17 +22,6 @@ public class SnakeController : MonoBehaviour
     private void Update()
     {
         input = Vector2Int.zero;
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            Grow();
-        }
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            if (CanMoveBackwards())
-            {
-                MoveBackwards();
-            }
-        }
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
         {
             input = Vector2Int.up;

@@ -17,6 +17,8 @@ public class GameManager : MonoBehaviour
     public GameObject successUI;
     [SerializeField] TextMeshProUGUI failureText;
     public String failureReason;
+    private AudioManager audioManager;
+    [SerializeField] GameObject audioManagerGameObject;
     void Awake()
     {
         instance = this; 
@@ -24,6 +26,10 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        if (GameObject.FindWithTag("Audio") == null)
+        {
+            Instantiate(audioManagerGameObject);
+        }
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = false;
         snakeController = GameObject.FindWithTag("Snake").GetComponent<SnakeController>();
@@ -34,6 +40,10 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             Restart();
+        }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene("MainMenu");
         }
     }
 
@@ -95,7 +105,17 @@ public class GameManager : MonoBehaviour
     private IEnumerator GoBackwardsUntil()
     {
         yield return new WaitForSeconds(.1f);
+        float timeToWait = .2f;
+        foreach (Transform segment in snakeController.segments)
+        {
+            Color newColor = new Color(0.8f, 0.5f, 0.5f, 1f);
+            SpriteRenderer colorToChange = segment.gameObject.GetComponent<SpriteRenderer>();
+            colorToChange.color = newColor;
+            yield return new WaitForSeconds(timeToWait);
+            timeToWait -= .02f;
+        }
         bool ableToGoBackwards = true;
+        AudioManager.instance.PlayFlyingSound();
         while (ableToGoBackwards)
         {
             if (snakeController.CanMoveBackwards())
@@ -107,19 +127,32 @@ public class GameManager : MonoBehaviour
                     ableToGoBackwards = false;
                     failureReason = "The snake is flying forever!";
                     FailureState();
+                    AudioManager.instance.StopFlyingSound();
+                    yield return null;
                 }
             }
             else
             {
                 ableToGoBackwards = false;
-                snakeController.canMove = true;
             }
+        }
+        foreach (Transform segment in snakeController.segments)
+        {
+            Color snakeColor = Color.white;
+            SpriteRenderer colorToChange = segment.gameObject.GetComponent<SpriteRenderer>();
+            colorToChange.color = snakeColor;
+            yield return new WaitForSeconds(0.1f);
         }
 
         if (!snakeController.IsOnFloor() || !ObjectsOnFloor())
         {
+            failureReason = "You've moved backwards to the void!";
+            AudioManager.instance.StopFlyingSound();
             FailureState();
+            yield return null;
         }
+        AudioManager.instance.StopFlyingSound();
+        snakeController.canMove = true;
         yield return null;
     }
 

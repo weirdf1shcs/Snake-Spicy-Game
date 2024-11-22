@@ -14,9 +14,11 @@ public class Object : MonoBehaviour
         switch (type)
         {
             case Type.Pepper:
+                AudioManager.instance.PlayPepperSFX();
                 GameManager.instance.GoBackwards();
                 break;
             case Type.Banana:
+                AudioManager.instance.PlayBananaSFX();
                 sc.Grow();
                 break;
         }
